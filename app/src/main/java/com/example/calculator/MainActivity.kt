@@ -1,5 +1,6 @@
 package com.example.calculator
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,7 +41,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    Greeting(viewModel)
+                    Greeting(
+                        viewModel,
+                        resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+                    )
                 }
             }
         }
@@ -50,7 +54,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalUnitApi::class)
 @Suppress("StateFlowValueCalledInComposition")
 @Composable
-fun Greeting(viewModel: MainViewModel) {
+fun Greeting(viewModel: MainViewModel, darkMode: Boolean) {
     val text = viewModel.result.collectAsState()
     Column(
         Modifier
@@ -91,7 +95,7 @@ fun Greeting(viewModel: MainViewModel) {
             Modifier
                 .fillMaxWidth()
                 .weight(1.0F)
-                .background(Color.White)
+                .background(if (darkMode) Color.Black else Color.White)
         ) {
             val normalModifier = Modifier
                 .weight(1.0F)
@@ -111,7 +115,7 @@ fun Greeting(viewModel: MainViewModel) {
                 OperatorButton(text = "Del", normalModifier) {
                     viewModel.delete()
                 }
-                LightOperatorButton(text = "÷", normalModifier) {
+                LightOperatorButton(text = "÷", normalModifier, darkMode) {
                     viewModel.operation("÷")
                 }
             }
@@ -129,7 +133,7 @@ fun Greeting(viewModel: MainViewModel) {
                 OperatorButton(text = "9", normalModifier) {
                     viewModel.operation("9")
                 }
-                LightOperatorButton(text = "×", normalModifier) {
+                LightOperatorButton(text = "×", normalModifier, darkMode) {
                     viewModel.operation("×")
                 }
             }
@@ -147,7 +151,7 @@ fun Greeting(viewModel: MainViewModel) {
                 OperatorButton(text = "6", normalModifier) {
                     viewModel.operation("6")
                 }
-                LightOperatorButton(text = "-", normalModifier) {
+                LightOperatorButton(text = "-", normalModifier, darkMode) {
                     viewModel.operation("-")
                 }
             }
@@ -165,7 +169,7 @@ fun Greeting(viewModel: MainViewModel) {
                 OperatorButton(text = "3", normalModifier) {
                     viewModel.operation("3")
                 }
-                LightOperatorButton(text = "+", normalModifier) {
+                LightOperatorButton(text = "+", normalModifier, darkMode) {
                     viewModel.operation("+")
                 }
             }
@@ -183,7 +187,7 @@ fun Greeting(viewModel: MainViewModel) {
                 OperatorButton(text = ".", normalModifier) {
                     viewModel.operation(".")
                 }
-                LightOperatorButton(text = "=", normalModifier) {
+                LightOperatorButton(text = "=", normalModifier, darkMode) {
                     viewModel.calculate()
                 }
             }
@@ -201,11 +205,11 @@ fun OperatorButton(text: String, modifier: Modifier, onClick: () -> Unit) {
 
 @OptIn(ExperimentalUnitApi::class)
 @Composable
-fun LightOperatorButton(text: String, modifier: Modifier, onClick: () -> Unit) {
+fun LightOperatorButton(text: String, modifier: Modifier, darkMode: Boolean, onClick: () -> Unit) {
     TextButton(
         onClick, modifier,
         colors = ButtonDefaults.textButtonColors(
-            Color(0xFFEEEEEE)
+            if (darkMode) Color(0xFF111111) else Color(0xFFEEEEEE)
         )
     ) {
         Text(text = text, fontSize = TextUnit(22F, TextUnitType.Sp))
@@ -216,6 +220,6 @@ fun LightOperatorButton(text: String, modifier: Modifier, onClick: () -> Unit) {
 @Composable
 fun DefaultPreview() {
     CalculatorTheme {
-        Greeting(MainViewModel())
+        Greeting(MainViewModel(), false)
     }
 }
