@@ -232,5 +232,6 @@ class MainViewModel : ViewModel() {
         }
 
         reset()
+        numbers.add(result.value)
     }
 }
