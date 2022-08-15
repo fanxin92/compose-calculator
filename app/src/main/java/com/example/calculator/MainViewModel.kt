@@ -181,11 +181,15 @@ class MainViewModel : ViewModel() {
                         }
                     }
                     OPERATOR_DIVIDE -> {
-                        numbers[0] = BigDecimal(number1).divide(
-                            BigDecimal(numbers[0]),
-                            4,
-                            BigDecimal.ROUND_HALF_UP
-                        ).toString()
+                        numbers[0] = if (numbers[0].toDouble() == 0.0) {
+                            "0"
+                        } else {
+                            BigDecimal(number1).divide(
+                                BigDecimal(numbers[0]),
+                                4,
+                                BigDecimal.ROUND_HALF_UP
+                            ).toString()
+                        }
                         if (operators.isEmpty()) {
                             newNumbers.offer(numbers[0])
                         }
@@ -224,7 +228,7 @@ class MainViewModel : ViewModel() {
                 it.substring(0, it.length - 3)
             } else if (it.endsWith("00")) {
                 it.substring(0, it.length - 2)
-            } else if (it.endsWith("0")) {
+            } else if (it.endsWith("0") && it != "0") {
                 it.substring(0, it.length - 1)
             } else {
                 it
