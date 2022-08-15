@@ -136,6 +136,10 @@ class MainViewModel : ViewModel() {
             return
         }
 
+        if (operators.isEmpty() && !numbers[0].contains("%")) {
+            return
+        }
+
         while (surplusCount.value > 0) {
             numbers.indexOfFirst {
                 it.contains("%")
@@ -154,6 +158,11 @@ class MainViewModel : ViewModel() {
                 numbers[it] =
                     sb.toString().toBigDecimal().divide(BigDecimal(100).pow(count)).toString()
             }
+        }
+
+        if (operators.isEmpty()) {
+            _result.value = numbers[0]
+            return
         }
 
         val newNumbers = LinkedList<String>()
@@ -190,7 +199,7 @@ class MainViewModel : ViewModel() {
             }
         }
 
-        if (newOperators.isNotEmpty()) {
+        val target = if (newOperators.isNotEmpty()) {
             var firstNumber = BigDecimal(newNumbers.removeAt(0))
             newOperators.forEach {
                 when (it) {
@@ -202,9 +211,22 @@ class MainViewModel : ViewModel() {
                     }
                 }
             }
-            _result.value = firstNumber.toString()
+            firstNumber.toString()
         } else {
-            _result.value = newNumbers[0]
+            newNumbers[0]
+        }
+        _result.value = target.let {
+            if (it.endsWith(".0000")) {
+                it.substring(0, it.length - 5)
+            } else if (it.endsWith("000")) {
+                it.substring(0, it.length - 3)
+            } else if (it.endsWith("00")) {
+                it.substring(0, it.length - 2)
+            } else if (it.endsWith("0")) {
+                it.substring(0, it.length - 1)
+            } else {
+                it
+            }
         }
 
         reset()
