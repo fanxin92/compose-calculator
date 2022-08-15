@@ -94,20 +94,22 @@ class MainViewModel : ViewModel() {
             }
             else -> {
                 if (numbers.size == operators.size) {
-                    numbers.add(char)
-                    _result.value = "${result.value}$char"
+                    if (char != "00") {
+                        numbers.add(char)
+                        _result.value = "${result.value}$char"
+                    }
                 } else {
                     if (!numbers.last().contains("%")) {
-                        numbers.removeLast().let {
-                            numbers.add("$it$char")
+                        if (numbers.last() != "0") {
+                            numbers.removeLast().let {
+                                numbers.add("$it$char")
+                            }
+                            _result.value = "${result.value}$char"
                         }
-                        _result.value = "${result.value}$char"
                     }
                 }
             }
         }
-        println(numbers)
-        println(operators)
     }
 
     fun delete() {
