@@ -1,7 +1,11 @@
 package com.example.calculator
 
 import android.content.res.Configuration
+import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.view.WindowInsetsController
+import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -14,6 +18,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +40,25 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val uiMode = resources.configuration.uiMode
+        val isLightTheme =
+            (uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_NO
+        window.statusBarColor =
+            if (isLightTheme) Color(0xFFFAFAFA).toArgb() else Color(0xFF060606).toArgb()
+        if (isLightTheme) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+            val decorView = window.decorView
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                decorView.windowInsetsController?.setSystemBarsAppearance(
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
+                    WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                )
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                decorView.systemUiVisibility =
+                    decorView.systemUiVisibility xor View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+            }
+        }
+
         setContent {
             CalculatorTheme {
                 Surface(
@@ -42,8 +66,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     Greeting(
-                        viewModel,
-                        resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+                        viewModel
                     )
                 }
             }
@@ -54,7 +77,7 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalUnitApi::class)
 @Suppress("StateFlowValueCalledInComposition")
 @Composable
-fun Greeting(viewModel: MainViewModel, darkMode: Boolean) {
+fun Greeting(viewModel: MainViewModel) {
     val text = viewModel.result.collectAsState()
     Column(
         Modifier
@@ -95,7 +118,7 @@ fun Greeting(viewModel: MainViewModel, darkMode: Boolean) {
             Modifier
                 .fillMaxWidth()
                 .weight(1.0F)
-                .background(if (darkMode) Color.Black else Color.White)
+                .background(if (MaterialTheme.colors.isLight) Color.White else Color(0XFF171717))
         ) {
             val normalModifier = Modifier
                 .weight(1.0F)
@@ -115,7 +138,7 @@ fun Greeting(viewModel: MainViewModel, darkMode: Boolean) {
                 OperatorButton(text = "Del", normalModifier) {
                     viewModel.delete()
                 }
-                LightOperatorButton(text = "÷", normalModifier, darkMode) {
+                LightOperatorButton(text = "÷", normalModifier) {
                     viewModel.operation("÷")
                 }
             }
@@ -133,7 +156,7 @@ fun Greeting(viewModel: MainViewModel, darkMode: Boolean) {
                 OperatorButton(text = "9", normalModifier) {
                     viewModel.operation("9")
                 }
-                LightOperatorButton(text = "×", normalModifier, darkMode) {
+                LightOperatorButton(text = "×", normalModifier) {
                     viewModel.operation("×")
                 }
             }
@@ -151,7 +174,7 @@ fun Greeting(viewModel: MainViewModel, darkMode: Boolean) {
                 OperatorButton(text = "6", normalModifier) {
                     viewModel.operation("6")
                 }
-                LightOperatorButton(text = "-", normalModifier, darkMode) {
+                LightOperatorButton(text = "-", normalModifier) {
                     viewModel.operation("-")
                 }
             }
@@ -169,7 +192,7 @@ fun Greeting(viewModel: MainViewModel, darkMode: Boolean) {
                 OperatorButton(text = "3", normalModifier) {
                     viewModel.operation("3")
                 }
-                LightOperatorButton(text = "+", normalModifier, darkMode) {
+                LightOperatorButton(text = "+", normalModifier) {
                     viewModel.operation("+")
                 }
             }
@@ -187,7 +210,7 @@ fun Greeting(viewModel: MainViewModel, darkMode: Boolean) {
                 OperatorButton(text = ".", normalModifier) {
                     viewModel.operation(".")
                 }
-                LightOperatorButton(text = "=", normalModifier, darkMode) {
+                LightOperatorButton(text = "=", normalModifier) {
                     viewModel.calculate()
                 }
             }
@@ -205,14 +228,16 @@ fun OperatorButton(text: String, modifier: Modifier, onClick: () -> Unit) {
 
 @OptIn(ExperimentalUnitApi::class)
 @Composable
-fun LightOperatorButton(text: String, modifier: Modifier, darkMode: Boolean, onClick: () -> Unit) {
+fun LightOperatorButton(text: String, modifier: Modifier, onClick: () -> Unit) {
+    val isLightTheme = MaterialTheme.colors.isLight
     TextButton(
         onClick, modifier,
         colors = ButtonDefaults.textButtonColors(
-            if (darkMode) Color(0xFF111111) else Color(0xFFEEEEEE)
+            if (isLightTheme) Color(0xFFF5F5F5) else Color(0xFF404040)
         )
     ) {
-        Text(text = text, fontSize = TextUnit(22F, TextUnitType.Sp))
+        val textColor = if (isLightTheme) Color.Black else Color.White
+        Text(text = text, color = textColor, fontSize = TextUnit(22F, TextUnitType.Sp))
     }
 }
 
@@ -220,6 +245,6 @@ fun LightOperatorButton(text: String, modifier: Modifier, darkMode: Boolean, onC
 @Composable
 fun DefaultPreview() {
     CalculatorTheme {
-        Greeting(MainViewModel(), false)
+        Greeting(MainViewModel())
     }
 }
