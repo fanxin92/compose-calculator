@@ -61,17 +61,12 @@ class MainViewModel : ViewModel() {
                 }
             }
             OPERATOR_SURPLUS -> {
-                _surplusCount.value = _surplusCount.value + 1
-                if (numbers.isEmpty()) {
-                    numbers.add("%")
-                    _result.value = "%"
-                } else {
-                    if (numbers.size == operators.size) {
-                        numbers.add("%")
-                    } else {
+                if (!numbers.isEmpty()) {
+                    if (numbers.size != operators.size) {
+                        _surplusCount.value = _surplusCount.value + 1
                         numbers.add("${numbers.removeLast()}%")
+                        _result.value = "${result.value}%"
                     }
-                    _result.value = "${result.value}%"
                 }
             }
             "." -> {
